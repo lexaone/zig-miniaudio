@@ -88,8 +88,14 @@ pub fn linkArtifact(b: *Builder, exe: *std.build.LibExeObjStep, target: std.buil
             exe.addObjectFile("src/c_src/miniaudio.o");
         }
     } else {
-        const cflags = &[_][]const u8{ "-DMA_NO_FLAC", "-DMA_NO_WEBAUDIO", "-DMA_NO_ENCODING", "-DMA_NO_NULL", "-DMA_NO_RUNTIME_LINKING" };
-        exe.addCSourceFile("src/c_src/miniaudio.c", cflags);
+        if (target.isDarwin()) {
+            const cflags = &[_][]const u8{ "-DMA_NO_FLAC", "-DMA_NO_WEBAUDIO", "-DMA_NO_ENCODING", "-DMA_NO_NULL", "-DMA_NO_RUNTIME_LINKING" };
+            exe.addCSourceFile("src/c_src/miniaudio.c", cflags);
+        } else {
+            //const cflags = &[_][]const u8{ "-DMA_NO_FLAC", "-DMA_NO_WEBAUDIO", "-DMA_NO_ENCODING", "-DMA_NO_NULL", "-DMA_NO_PULSEAUDIO" };
+            const cflags = &[_][]const u8{ "-DMA_NO_WEBAUDIO", "-DMA_NO_ENCODING", "-DMA_NO_NULL" };
+            exe.addCSourceFile("src/c_src/miniaudio.c", cflags);
+        }
     }
 
     exe.addPackagePath("miniaudio", std.fs.path.join(b.allocator, &[_][]const u8{"src/miniaudio.zig"}) catch unreachable);
